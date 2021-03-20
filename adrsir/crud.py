@@ -120,6 +120,9 @@ def create_code(db: Session, code: schemas.CodeCreate):
 
 
 def update_code(db: Session, code: schemas.CodeUpdate):
+    """
+    Update Code
+    """
     db_code = db.query(models.Code).filter(models.Code.id == code.id).one()
     db_code.name = code.name
     db_code.device_id = code.device_id
@@ -130,6 +133,9 @@ def update_code(db: Session, code: schemas.CodeUpdate):
 
 
 def delete_code(db: Session, code_id: int):
+    """
+    Delete Code
+    """
     target_code = db.query(models.Code).filter(models.Code.id == code_id).one()
     db.delete(target_code)
     db.commit()
@@ -137,6 +143,9 @@ def delete_code(db: Session, code_id: int):
 
 
 def delete_code_of_device(db: Session, device_id: int, code_id: int):
+    """
+    Delete Code
+    """
     target_code = (
         db.query(models.Code)
         .filter(models.Code.device_id == device_id)
