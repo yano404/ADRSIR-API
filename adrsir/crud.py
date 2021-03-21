@@ -24,11 +24,17 @@ def get_devices_by_name(db: Session, name: str):
     return db.query(models.Device).filter(models.Device.name == name).all()
 
 
-def get_devices_by_group(db: Session, group: str):
+def get_devices_by_group(db: Session, group: str, skip: int = 0, limit: int = 100):
     """
     Get Devices by Group
     """
-    return db.query(models.Device).filter(models.Device.group == group).all()
+    return (
+        db.query(models.Device)
+        .filter(models.Device.group == group)
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
 
 
 def get_groups(db: Session):
@@ -50,16 +56,16 @@ def create_device(db: Session, device: schemas.DeviceCreate):
     return db_device
 
 
-def update_device(db: Session, device: schemas.DeviceUpdate):
+def update_device(db: Session, device_id: int, device: schemas.DeviceUpdate):
     """
     Update Device Info
     """
-    db_device = db.query(models.Device).filter(models.Device.id == device.id).one()
+    db_device = db.query(models.Device).filter(models.Device.id == device_id).one()
     db_device.name = device.name
     db_device.group = device.group
     db_device.desc = device.desc
     db.commit()
-    return db.query(models.Device).filter(models.Device.id == device.id).first()
+    return db.query(models.Device).filter(models.Device.id == device_id).first()
 
 
 def delete_device(db: Session, device_id: int):
@@ -131,17 +137,17 @@ def create_code(db: Session, code: schemas.CodeCreate):
     return db_code
 
 
-def update_code(db: Session, code: schemas.CodeUpdate):
+def update_code(db: Session, code_id: int, code: schemas.CodeUpdate):
     """
     Update Code
     """
-    db_code = db.query(models.Code).filter(models.Code.id == code.id).one()
+    db_code = db.query(models.Code).filter(models.Code.id == code_id).one()
     db_code.name = code.name
     db_code.device_id = code.device_id
     db_code.code = code.code
     db_code.desc = code.desc
     db.commit()
-    return db.query(models.Code).filter(models.Code.id == code.id).first()
+    return db.query(models.Code).filter(models.Code.id == code_id).first()
 
 
 def delete_code(db: Session, code_id: int):

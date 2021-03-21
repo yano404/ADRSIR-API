@@ -23,10 +23,10 @@ def get_db():
 """
 CRUD Device
 ===========
-POST /devices             --> add device
+POST /devices/            --> add device
 GET  /devices/            --> list devices
 GET  /devices/{device_id} --> show device info
-PUT  /devices/            --> update device
+PUT  /devices/{device_id} --> update device
 DEL  /devices/{device_id} --> remove device and its codes
 """
 
@@ -50,7 +50,7 @@ def read_devices(
     Get Devices
     """
     if group:
-        devices = crud.get_devices_by_group(db=db, skip=skip, limit=limit, group=group)
+        devices = crud.get_devices_by_group(db=db, group=group, skip=skip, limit=limit)
     else:
         devices = crud.get_devices(db=db, skip=skip, limit=limit)
     return devices
@@ -65,12 +65,14 @@ def read_device(device_id: int, db: Session = Depends(get_db)):
     return device
 
 
-@app.put("/devices/", response_model=schemas.Device)
-def update_device(device: schemas.DeviceUpdate, db: Session = Depends(get_db)):
+@app.put("/devices/{device_id}", response_model=schemas.Device)
+def update_device(
+    device_id: int, device: schemas.DeviceUpdate, db: Session = Depends(get_db)
+):
     """
     Update Device
     """
-    return crud.update_device(db=db, device=device)
+    return crud.update_device(db=db, device_id=device_id, device=device)
 
 
 @app.delete("/devices/{device_id}", response_model=schemas.Device)
@@ -94,6 +96,17 @@ def read_groups(db: Session = Depends(get_db)):
 
 """
 CRUD Code
+=========
+POST /codes/                              --> add code
+POST /devices/{device_id}/codes/          --> add code
+GET  /codes/                              --> list codes
+GET  /codes/{code_id}                     --> show code info
+GET  /devices/{device_id}/codes           --> list codes
+GET  /devices/{device_id}/codes/{code_id} --> show code info
+PUT  /codes/{code_id}                     --> update code
+PUT  /devices/{device_id}/codes/{code_id} --> update code
+DEL  /codes/{code_id}                     --> remove code
+DEL  /devices/{device_id}/codes/{code_id} --> remove code
 """
 
 
@@ -177,27 +190,36 @@ def read_device_code(device_id: int, code_id: int, db: Session = Depends(get_db)
     return crud.get_code_of_device(db=db, device_id=device_id, code_id=code_id)
 
 
-@app.put("/codes/", response_model=schemas.Code)
-def update_code(code: schemas.CodeUpdate, db: Session = Depends(get_db)):
+@app.put("/codes/{code_id}", response_model=schemas.Code)
+def update_code(code_id: int, code: schemas.CodeUpdate, db: Session = Depends(get_db)):
     """
     Update Code
     """
-    return crud.update_code(db=db, code=code)
+    device = crud.get_device(db=db, device_id=code.device_id)
+    if not device:
+        raise HTTPException(status_code=400, detail="Device does NOT exist")
+
+    return crud.update_code(db=db, code_id=code_id, code=code)
 
 
-@app.put("/devices/{device_id}/codes/", response_model=schemas.Code)
+@app.put("/devices/{device_id}/codes/{code_id}", response_model=schemas.Code)
 def update_device_code(
-    device_id: int, code: schemas.CodeUpdateDevice, db: Session = Depends(get_db)
+    device_id: int,
+    code_id: int,
+    code: schemas.CodeUpdateDevice,
+    db: Session = Depends(get_db),
 ):
     """
     Update Code
     """
-    db_code = crud.get_code_of_device(db=db, device_id=device_id, code_id=code.id)
+    db_code = crud.get_code_of_device(db=db, device_id=device_id, code_id=code_id)
     if not db_code:
         return None
     code_dict = code.dict()
-    code_dict.update({"device_id": device_id})
-    return crud.update_code(db=db, code=schemas.CodeUpdate(**code_dict))
+    code_dict.update({"id": code_id, "device_id": device_id})
+    return crud.update_code(
+        db=db, code_id=code_id, code=schemas.CodeUpdate(**code_dict)
+    )
 
 
 @app.delete("/codes/{code_id}", response_model=schemas.Code)
@@ -226,6 +248,12 @@ def delete_device_code(device_id: int, code_id: int, db: Session = Depends(get_d
 
 """
 Read & Transmit the Code
+========================
+GET  /read/{mem_id}                              --> read the code
+POST /write/{mem_id}                             --> write the code to the memory
+POST /transmit/                                  --> transmit the code
+POST /codes/{code_id}/transmit                   --> transmit the code
+POST /devices/{devie_id}/codes/{code_id}/trasmit --> transmit the code
 """
 
 

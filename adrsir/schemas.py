@@ -14,12 +14,11 @@ class CodeCreate(CodeBase):
 
 
 class CodeUpdate(CodeBase):
-    id: int
     device_id: int
 
 
 class CodeUpdateDevice(CodeBase):
-    id: int
+    pass
 
 
 class Code(CodeBase):
@@ -41,7 +40,7 @@ class DeviceCreate(DeviceBase):
 
 
 class DeviceUpdate(DeviceBase):
-    id: int
+    pass
 
 
 class Device(DeviceBase):
