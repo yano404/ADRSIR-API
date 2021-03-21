@@ -13,6 +13,10 @@ class CodeCreate(CodeBase):
     device_id: int
 
 
+class CodeCreateDevice(CodeBase):
+    pass
+
+
 class CodeUpdate(CodeBase):
     device_id: int
 

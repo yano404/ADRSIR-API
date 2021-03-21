@@ -50,10 +50,12 @@ def read_devices(
     Get Devices
     """
     if group:
-        devices = crud.get_devices_by_group(db=db, group=group, skip=skip, limit=limit)
+        db_devices = crud.get_devices_by_group(
+            db=db, group=group, skip=skip, limit=limit
+        )
     else:
-        devices = crud.get_devices(db=db, skip=skip, limit=limit)
-    return devices
+        db_devices = crud.get_devices(db=db, skip=skip, limit=limit)
+    return db_devices
 
 
 @app.get("/devices/{device_id}", response_model=schemas.Device)
@@ -61,8 +63,10 @@ def read_device(device_id: int, db: Session = Depends(get_db)):
     """
     Get Device by ID
     """
-    device = crud.get_device(db=db, device_id=device_id)
-    return device
+    db_device = crud.get_device(db=db, device_id=device_id)
+    if db_device is None:
+        raise HTTPException(status_code=404, detail="Device not found")
+    return db_device
 
 
 @app.put("/devices/{device_id}", response_model=schemas.Device)
@@ -72,6 +76,9 @@ def update_device(
     """
     Update Device
     """
+    db_device = crud.get_device(db=db, device_id=device_id)
+    if db_device is None:
+        raise HTTPException(status_code=404, detail="Device not found")
     return crud.update_device(db=db, device_id=device_id, device=device)
 
 
@@ -80,9 +87,14 @@ def delete_device(device_id: int, db: Session = Depends(get_db)):
     """
     Delete Device
     """
+    db_device = crud.get_device(db=db, device_id=device_id)
+    if db_device is None:
+        raise HTTPException(status_code=404, detail="Device not found")
+
     db_code = crud.get_codes_of_device(db=db, device_id=device_id)
     for code in db_code:
         crud.delete_code(db=db, code_id=code.id)
+
     return crud.delete_device(db=db, device_id=device_id)
 
 
@@ -115,25 +127,26 @@ def create_code(code: schemas.CodeCreate, db: Session = Depends(get_db)):
     """
     Create Code
     """
-    device = crud.get_device(db=db, device_id=code.device_id)
-    if not device:
+    db_device = crud.get_device(db=db, device_id=code.device_id)
+    if db_device is None:
         raise HTTPException(status_code=400, detail="Device does NOT exist")
 
     db_code = crud.get_code_by_code_str(db=db, code_str=code.code)
     if db_code:
         raise HTTPException(status_code=400, detail="Code already registered")
+
     return crud.create_code(db=db, code=code)
 
 
 @app.post("/devices/{device_id}/codes", response_model=schemas.Code)
 def create_device_code(
-    device_id: int, code: schemas.CodeBase, db: Session = Depends(get_db)
+    device_id: int, code: schemas.CodeCreateDevice, db: Session = Depends(get_db)
 ):
     """
     Create Code
     """
-    device = crud.get_device(db=db, device_id=device_id)
-    if not device:
+    db_device = crud.get_device(db=db, device_id=device_id)
+    if db_device is None:
         raise HTTPException(status_code=400, detail="Device does NOT exist")
 
     db_code = crud.get_code_by_code_str(db=db, code_str=code.code)
@@ -156,10 +169,10 @@ def read_codes(
     Get Codes
     """
     if device_id:
-        codes = crud.get_codes_of_device(db=db, device_id=device_id)
+        db_codes = crud.get_codes_of_device(db=db, device_id=device_id)
     else:
-        codes = crud.get_codes(db=db, skip=skip, limit=limit)
-    return codes
+        db_codes = crud.get_codes(db=db, skip=skip, limit=limit)
+    return db_codes
 
 
 @app.get("/codes/{code_id}", response_model=schemas.Code)
@@ -170,7 +183,10 @@ def read_code(
     """
     Get Code
     """
-    return crud.get_code(db=db, code_id=code_id)
+    db_code = crud.get_code(db=db, code_id=code_id)
+    if db_code is None:
+        raise HTTPException(status_code=404, detail="Code not found")
+    return db_code
 
 
 @app.get("/devices/{device_id}/codes", response_model=List[schemas.Code])
@@ -178,8 +194,8 @@ def read_device_codes(device_id: int, db: Session = Depends(get_db)):
     """
     Get Codes
     """
-    codes = crud.get_codes_of_device(db=db, device_id=device_id)
-    return codes
+    db_codes = crud.get_codes_of_device(db=db, device_id=device_id)
+    return db_codes
 
 
 @app.get("/devices/{device_id}/codes/{code_id}", response_model=schemas.Code)
@@ -187,7 +203,10 @@ def read_device_code(device_id: int, code_id: int, db: Session = Depends(get_db)
     """
     Get Code
     """
-    return crud.get_code_of_device(db=db, device_id=device_id, code_id=code_id)
+    db_code = crud.get_code_of_device(db=db, device_id=device_id, code_id=code_id)
+    if db_code is None:
+        raise HTTPException(status_code=404, detail="Code not found")
+    return db_code
 
 
 @app.put("/codes/{code_id}", response_model=schemas.Code)
@@ -195,8 +214,12 @@ def update_code(code_id: int, code: schemas.CodeUpdate, db: Session = Depends(ge
     """
     Update Code
     """
-    device = crud.get_device(db=db, device_id=code.device_id)
-    if not device:
+    db_code = crud.get_code(db=db, code_id=code_id)
+    if db_code is None:
+        raise HTTPException(status_code=404, detail="Code not found")
+
+    db_device = crud.get_device(db=db, device_id=code.device_id)
+    if db_device is None:
         raise HTTPException(status_code=400, detail="Device does NOT exist")
 
     return crud.update_code(db=db, code_id=code_id, code=code)
@@ -213,8 +236,9 @@ def update_device_code(
     Update Code
     """
     db_code = crud.get_code_of_device(db=db, device_id=device_id, code_id=code_id)
-    if not db_code:
-        return None
+    if db_code is None:
+        raise HTTPException(status_code=404, detail="Code not found")
+
     code_dict = code.dict()
     code_dict.update({"id": code_id, "device_id": device_id})
     return crud.update_code(
@@ -228,9 +252,9 @@ def delete_code(code_id: int, db: Session = Depends(get_db)):
     Delete Code
     """
     db_code = crud.get_code(db=db, code_id=code_id)
-    if not db_code:
-        # raise HTTPException(status_code=400, detail="Code does NOT exist")
-        return None
+    if db_code is None:
+        raise HTTPException(status_code=404, detail="Code not found")
+
     return crud.delete_code(db=db, code_id=code_id)
 
 
@@ -240,9 +264,9 @@ def delete_device_code(device_id: int, code_id: int, db: Session = Depends(get_d
     Delete Code
     """
     db_code = crud.get_code_of_device(db=db, device_id=device_id, code_id=code_id)
-    if not db_code:
-        # raise HTTPException(status_code=400, detail="Code does NOT exist")
-        return None
+    if db_code is None:
+        raise HTTPException(status_code=404, detail="Code not found")
+
     return crud.delete_code(db=db, code_id=code_id)
 
 
