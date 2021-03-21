@@ -84,6 +84,14 @@ def delete_device(device_id: int, db: Session = Depends(get_db)):
     return crud.delete_device(db=db, device_id=device_id)
 
 
+@app.get("/groups/")
+def read_groups(db: Session = Depends(get_db)):
+    """
+    Get Groups
+    """
+    return crud.get_groups(db=db)
+
+
 """
 CRUD Code
 """

@@ -31,6 +31,14 @@ def get_devices_by_group(db: Session, group: str):
     return db.query(models.Device).filter(models.Device.group == group).all()
 
 
+def get_groups(db: Session):
+    """
+    Get Groups
+    """
+    groups = db.query(models.Device.group).all()
+    return list(set(groups))
+
+
 def create_device(db: Session, device: schemas.DeviceCreate):
     """
     Create Device
