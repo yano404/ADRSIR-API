@@ -1,15 +1,16 @@
 [tool.poetry]
-name = "fastapi-tuto"
+name = "adrsir-api"
 version = "0.1.0"
-description = "fastapi tutorial"
+description = "The api to control ADRSIR which is the universal remote HAT"
 authors = ["Takayuki Yano <yanodelta@gmail.com>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.7"
 fastapi = "^0.63.0"
 uvicorn = "^0.13.4"
 SQLAlchemy = "^1.3.23"
+pydantic = "^1.8.1"
 
 [tool.poetry.dev-dependencies]
 isort = "^5.7.0"
