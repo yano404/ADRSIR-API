@@ -292,7 +292,7 @@ def read_mem(mem_id: int = Path(..., ge=0, le=9)):
 @app.post("/write/{mem_id}")
 def write_mem(
     mem_id: int = Path(..., ge=0, le=9),
-    code: str = Query(min_length=2, max_length=600, regex=r"^[0-9A-Fa-f]+$"),
+    code: str = Query(..., min_length=2, max_length=600, regex=r"^[0-9A-Fa-f]+$"),
 ):
     """
     Write the code to the memory
@@ -302,7 +302,7 @@ def write_mem(
 
 
 @app.post("/transmit/")
-def transmit(code: str = Query(min_length=2, max_length=600)):
+def transmit(code: str = Query(..., min_length=2, max_length=600)):
     """
     Transmit the code
     """
