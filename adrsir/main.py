@@ -311,20 +311,20 @@ def transmit(code: str = Query(..., min_length=2, max_length=600)):
 
 
 @app.post("/codes/{code_id}/transmit")
-def transmit_code(code_id: int):
+def transmit_code(code_id: int, db: Session = Depends(get_db)):
     """
     Transmit the code
     """
-    code = crud.get_code(code_id=code_id)
+    code = crud.get_code(db=db, code_id=code_id)
     adrsir.transmit(code.code)
     return {"device_id": code.device_id, "code_id": code.id}
 
 
 @app.post("/devices/{device_id}/codes/{code_id}/transmit")
-def transmit_device_code(device_id: int, code_id: int):
+def transmit_device_code(device_id: int, code_id: int, db: Session = Depends(get_db)):
     """
     Transmit the code
     """
-    code = crud.get_code_of_device(device_id=device_id, code_id=code_id)
+    code = crud.get_code_of_device(db=db, device_id=device_id, code_id=code_id)
     adrsir.transmit(code.code)
     return {"device_id": device_id, "code_id": code_id}
