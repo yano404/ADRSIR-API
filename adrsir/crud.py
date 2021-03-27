@@ -76,8 +76,9 @@ def delete_device(db: Session, device_id: int):
     target_codes = (
         db.query(models.Code).filter(models.Code.device_id == device_id).all()
     )
-    db.delete(target_codes)
-    db.commit()
+    for code in target_codes:
+        db.delete(target_codes)
+        db.commit()
     # Delete Device
     target_device = db.query(models.Device).filter(models.Device.id == device_id).one()
     db.delete(target_device)
