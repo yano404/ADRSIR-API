@@ -1,4 +1,4 @@
-from sqlalchemy import desc
+from sqlalchemy import asc
 from sqlalchemy.orm import Session
 
 from . import models, schemas
@@ -17,7 +17,7 @@ def get_devices(db: Session, skip: int = 0, limit: int = 100):
     """
     return (
         db.query(models.Device)
-        .order_by(desc(models.Device.id))
+        .order_by(asc(models.Device.id))
         .offset(skip)
         .limit(limit)
         .all()
@@ -31,7 +31,7 @@ def get_devices_by_name(db: Session, name: str):
     return (
         db.query(models.Device)
         .filter(models.Device.name == name)
-        .order_by(desc(models.Device.id))
+        .order_by(asc(models.Device.id))
         .all()
     )
 
@@ -43,7 +43,7 @@ def get_devices_by_group(db: Session, group: str, skip: int = 0, limit: int = 10
     return (
         db.query(models.Device)
         .filter(models.Device.group == group)
-        .order_by(desc(models.Device.id))
+        .order_by(asc(models.Device.id))
         .offset(skip)
         .limit(limit)
         .all()
@@ -120,7 +120,7 @@ def get_codes(db: Session, skip: int = 0, limit: int = 1000):
     """
     return (
         db.query(models.Code)
-        .order_by(desc(models.Code.id))
+        .order_by(asc(models.Code.id))
         .offset(skip)
         .limit(limit)
         .all()
@@ -134,7 +134,7 @@ def get_codes_of_device(db: Session, device_id: int):
     return (
         db.query(models.Code)
         .filter(models.Code.device_id == device_id)
-        .order_by(desc(models.Code.id))
+        .order_by(asc(models.Code.id))
         .all()
     )
 
