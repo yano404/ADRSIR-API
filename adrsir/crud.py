@@ -1,3 +1,4 @@
+from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
 from . import models, schemas
@@ -14,14 +15,25 @@ def get_devices(db: Session, skip: int = 0, limit: int = 100):
     """
     Get Device list (default: up to 100 devices)
     """
-    return db.query(models.Device).offset(skip).limit(limit).all()
+    return (
+        db.query(models.Device)
+        .order_by(desc(models.Device.id))
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
 
 
 def get_devices_by_name(db: Session, name: str):
     """
     Get Device by Name
     """
-    return db.query(models.Device).filter(models.Device.name == name).all()
+    return (
+        db.query(models.Device)
+        .filter(models.Device.name == name)
+        .order_by(desc(models.Device.id))
+        .all()
+    )
 
 
 def get_devices_by_group(db: Session, group: str, skip: int = 0, limit: int = 100):
@@ -31,6 +43,7 @@ def get_devices_by_group(db: Session, group: str, skip: int = 0, limit: int = 10
     return (
         db.query(models.Device)
         .filter(models.Device.group == group)
+        .order_by(desc(models.Device.id))
         .offset(skip)
         .limit(limit)
         .all()
@@ -42,7 +55,7 @@ def get_groups(db: Session):
     Get Groups
     """
     groups = db.query(models.Device.group).all()
-    return list(set(groups))
+    return sorted(list(set(groups)))
 
 
 def create_device(db: Session, device: schemas.DeviceCreate):
@@ -105,14 +118,25 @@ def get_codes(db: Session, skip: int = 0, limit: int = 1000):
     """
     Get Codes list (default: up to 1000)
     """
-    return db.query(models.Code).offset(skip).limit(limit).all()
+    return (
+        db.query(models.Code)
+        .order_by(desc(models.Code.id))
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
 
 
 def get_codes_of_device(db: Session, device_id: int):
     """
     Get Codes list of Device
     """
-    return db.query(models.Code).filter(models.Code.device_id == device_id).all()
+    return (
+        db.query(models.Code)
+        .filter(models.Code.device_id == device_id)
+        .order_by(desc(models.Code.id))
+        .all()
+    )
 
 
 def get_code_of_device(db: Session, device_id: int, code_id: int):
