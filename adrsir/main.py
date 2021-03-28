@@ -14,10 +14,10 @@ adrsir = adrsir.AdrsirCtrl()
 
 app.add_middleware(
     CORSMiddleware,
-    arrow_origins=["*"],
-    arrow_credentials=True,
-    arrow_methods=["*"],
-    arrow_headers=["*"],
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
