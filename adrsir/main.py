@@ -1,6 +1,7 @@
 from typing import List, Optional
 
 from fastapi import Depends, FastAPI, HTTPException, Path, Query
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 from . import adrsir, crud, models, schemas
@@ -10,6 +11,14 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 adrsir = adrsir.AdrsirCtrl()
+
+app.add_middleware(
+    CORSMiddleware,
+    arrow_origins=["*"],
+    arrow_credentials=True,
+    arrow_methods=["*"],
+    arrow_headers=["*"],
+)
 
 
 def get_db():
