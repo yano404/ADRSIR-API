@@ -114,13 +114,6 @@ def get_code_by_code_str(db: Session, code_str: str):
     return db.query(models.Code).filter(models.Code.code == code_str).first()
 
 
-def get_codes_by_code_str(db: Session, code_str: str):
-    """
-    Get Codes by code string
-    """
-    return db.query(models.Code).filter(models.Code.code == code_str).all()
-
-
 def get_codes(db: Session, skip: int = 0, limit: int = 1000):
     """
     Get Codes list (default: up to 1000)
