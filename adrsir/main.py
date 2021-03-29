@@ -233,7 +233,7 @@ def update_code(code_id: int, code: schemas.CodeUpdate, db: Session = Depends(ge
 
     db_same_code = crud.get_code_by_code_str(db=db, code_str=code.code)
     if db_same_code:
-        if db_same_code.id != code.id:
+        if db_same_code.id != code_id:
             raise HTTPException(status_code=400, detail="Code already registered")
 
     return crud.update_code(db=db, code_id=code_id, code=code)
@@ -255,7 +255,7 @@ def update_device_code(
 
     db_same_code = crud.get_code_by_code_str(db=db, code_str=code.code)
     if db_same_code:
-        if db_same_code.id != code.id:
+        if db_same_code.id != code_id:
             raise HTTPException(status_code=400, detail="Code already registered")
 
     code_dict = code.dict()
