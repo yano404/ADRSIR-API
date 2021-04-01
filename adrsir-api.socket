@@ -1,0 +1,9 @@
+[Unit]
+Description=ADRSIR-API socket
+
+[Socket]
+ListenStream=/run/adrsir-api.sock
+SocketUser=www-data
+
+[Install]
+WantedBy=sockets.target
