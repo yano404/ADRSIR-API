@@ -1,0 +1,18 @@
+[Unit]
+Description=ADRSIR-API
+Requires=adrsir-api.socket
+After=network.target
+
+[Service]
+# Modify to suit your environment
+Type=notify
+User=pi
+Group=pi
+WorkingDirectory=/home/pi/adrsir-api
+ExecStart=/home/pi/.local/bin/gunicorn adrsir.main:app
+KillMode=mixed
+TimeoutStopSec=5
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
