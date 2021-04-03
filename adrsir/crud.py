@@ -54,8 +54,8 @@ def get_groups(db: Session):
     """
     Get Groups
     """
-    groups = db.query(models.Device.group).all()
-    return sorted(list(set(groups)))
+    groups = [g[0] for g in db.query(models.Device.group).all()]
+    return sorted(set(groups))
 
 
 def create_device(db: Session, device: schemas.DeviceCreate):
