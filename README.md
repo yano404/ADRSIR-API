@@ -1,7 +1,7 @@
 ADRSIR-API
 ==========
 
-ADRSIR-API is the API to control ADRSIR (universal remote board for Raspberry Pi).
+ADRSIR-API is the API to control [ADRSIR](https://bit-trade-one.co.jp/product/module/adrsir/) (universal remote board for Raspberry Pi).
 
 ## Requirements
 - python >= 3.7
@@ -23,7 +23,7 @@ You will see the interactive API documentation.
 
 ### Deploy with gunicorn and nginx
 1. Edit `adrsir-api.service` to suite your environment.
-```
+```systemd
 [Service]
 # Modify to suit your environment
 Type=notify
@@ -45,6 +45,32 @@ $ systemctl enable --now adrsir-api.service
 
 3. Edit `adrsir-api.conf` to suite your environments.
 It will be necessary to change `server_name`.
+```nginx
+# This is the Nginx configulation file
+# Place this file /etc/nginx/conf.d
+upstream api_server{
+    server unix:/run/adrsir-api.sock fail_timeout=0;
+}
+
+server {
+    listen 8000;
+    listen [::]:8000;
+    client_max_body_size 4G;
+    # your Raspberry Pi's IP
+    server_name raspberrypi.local;
+    keepalive_timeout 5;
+    location / {
+      try_files $uri @proxy_to_api;
+    }
+    location @proxy_to_api {
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto $scheme;
+      proxy_set_header Host $http_host;
+      proxy_redirect off;
+      proxy_pass http://api_server;
+    }
+}
+```
 
 4. Move `adrsir-api.conf` to `/etc/nginx/conf.d` and restart nginx.
 ```
